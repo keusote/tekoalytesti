@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keusoten tekoälyn tiekartta - Tietotesti</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #e74c3c;
+        }
+
+        .logo {
+            color: #e74c3c;
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin: 10px 0;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        .question-container {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+
+        .question {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .options {
+            display: grid;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 12px 15px;
+            background: white;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover {
+            border-color: #3498db;
+            background: #ebf3fd;
+            transform: translateY(-2px);
+        }
+
+        .option.selected {
+            border-color: #2980b9;
+            background: #3498db;
+            color: white;
+        }
+
+        .option input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .submit-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 10px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .results.excellent {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .results.good {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .results.needs-improvement {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .score {
+            font-size: 2em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .feedback {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .wrong-answers {
+            margin-top: 20px;
+        }
+
+        .wrong-answer {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid rgba(255,255,255,0.3);
+        }
+
+        .restart-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 12px 25px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #ecf0f1;
+            border-radius: 3px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">KEUSOTE</div>
+            <h1>Tekoälyn tiekartta - Tietotesti</h1>
+            <div class="subtitle">Testaa tietämyksesi Keusoten tekoälystrategiasta</div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress" id="progressBar"></div>
+        </div>
+
+        <form id="quizForm">
+            <div class="question-container">
+                <div class="question">1. Mikä on Keusoten tekoälyn visio vuodelle 2029?</div>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q1" value="a">
+                        Tekoäly korvaa suurimman osan työntekijöistä
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="b">
+                        Rohkea ja systemaattinen tekoälyn hyödyntäminen tekee Keusotesta vaikuttavan toimijan
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="c">
+                        Tekoälyä käytetään vain hallinnollisissa tehtävissä
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="d">
+                        Tekoäly keskittyy ainoastaan tietojohtamiseen
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-container">
+                <div class="question">2. Mikä on Keusoten tekoälyn prioriteettijärjestyksen ensimmäinen kohde?</div>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q2" value="a">
+                        Tietotyö
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="b">
+                        Hallinto
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="c">
+                        Potilas- ja asiakastyö
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="d">
+                        Tietojohtaminen
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-container">
+                <div class="question">3. Mikä on Keusoten teknologinen periaate tekoälyratkaisujen hankinnassa?</div>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q3" value="a">
+                        Integraation ensisijaisuus
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="b">
+                        Erillisratkaisujen ensisijaisuus
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="c">
+                        Halvin vaihtoehto ensin
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="d">
+                        Vain pilviratkaisuja
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-container">
+                <div class="question">4. Mikä on Keusoten suositeltu generatiivisen tekoälyn työkalu tietosuojan ja -turvan kannalta?</div>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q4" value="a">
+                        ChatGPT
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="b">
+                        Claude
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="c">
+                        Microsoft Copilot Chat (työprofiili)
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="d">
+                        Google Gemini
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-container">
+                <div class="question">5. Miten uudet tekoälyideat tulee käsitellä Keusotessa?</div>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q5" value="a">
+                        Suoraan tekoälytiimille sähköpostitse
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="b">
+                        Esimiehen kautta ylöspäin
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="c">
+                        Kokonaiskehittämisen mallin kautta (Jelppi-tiketti)
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="d">
+                        Suoraan ICT-osastolle
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-container">
+                <div class="question">6. Mikä on Keusoten periaate asiakastietojen sijainnista tekoälyratkaisuissa?</div>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q6" value="a">
+                        Tiedot voivat olla missä tahansa
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q6" value="b">
+                        Tiedot saa tallentaa vain Suomeen
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q6" value="c">
+                        Asiakas- ja potilastietojen on oltava EU/ETA-alueella
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q6" value="d">
+                        Tiedot pitää tallentaa vain Keusoten omille palvelimille
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-container">
+                <div class="question">7. Kuinka monta prosenttia vaikuttavuutta Keusote tavoittelee tekoälyn hyödyntämisestä?</div>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q7" value="a">
+                        5 %
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q7" value="b">
+                        10 %
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q7" value="c">
+                        15 %
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q7" value="d">
+                        20 %
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-container">
+                <div class="question">8. Mikä on tekoälyn käytön tärkein perusohje työntekijöille?</div>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q8" value="a">
+                        Käytä tekoälyä vain kerran viikossa
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q8" value="b">
+                        Tarkista aina tekoälyn tuottamat tulokset ennen käyttöä
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q8" value="c">
+                        Älä koskaan käytä tekoälyä potilastietojen kanssa
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q8" value="d">
+                        Käytä vain maksullisia tekoälypalveluita
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-container">
+                <div class="question">9. Mikä on tekoälytiimin rooli tekoälyhankinnoissa Keusotessa?</div>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q9" value="a">
+                        Tekoälytiimi tekee kaikki hankintapäätökset
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q9" value="b">
+                        Tekoälytiimiä konsultoidaan aina, mutta omistajuus on toiminnoissa
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q9" value="c">
+                        Tekoälytiimi vastaa vain teknisestä toteutuksesta
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q9" value="d">
+                        Toiminnot voivat hankkia tekoälyä ilman tekoälytiimin tietämystä
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-container">
+                <div class="question">10. Mikä on Keusoten tekoälyn motto?</div>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q10" value="a">
+                        "Tekoäly on tulevaisuus"
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q10" value="b">
+                        "Tukiäly kuuluu kaikille!"
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q10" value="c">
+                        "Tekoäly parantaa työtä"
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q10" value="d">
+                        "Digitalisaatio edellä"
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">Lähetä vastaukset</button>
+        </form>
+
+        <div class="results" id="results">
+            <div class="score" id="scoreDisplay"></div>
+            <div class="feedback" id="feedbackText"></div>
+            <div class="wrong-answers" id="wrongAnswers"></div>
+            <button class="restart-btn" onclick="restartQuiz()">Aloita testi uudelleen</button>
+        </div>
+    </div>
+
+    <script>
+        const correctAnswers = {
+            q1: 'b',
+            q2: 'c', 
+            q3: 'a',
+            q4: 'c',
+            q5: 'c',
+            q6: 'c',
+            q7: 'b',
+            q8: 'b',
+            q9: 'b',
+            q10: 'b'
+        };
+
+        const explanations = {
+            q1: {
+                correct: 'b',
+                explanation: 'Keusoten tekoälyn visio 2029: "Rohkea ja systemaattinen tekoälyn hyödyntäminen on tehnyt Keski-Uudenmaan hyvinvointialueesta vaikuttavan toimijan."'
+            },
+            q2: {
+                correct: 'c',
+                explanation: 'Prioriteettijärjestys on: 1) Potilas- ja asiakastyö, 2) Hallinto, 3) Tietojohtaminen, 4) Tietotyö.'
+            },
+            q3: {
+                correct: 'a',
+                explanation: 'Keusoten teknologinen periaate: "Integraation ensisijaisuus - Suositaan järjestelmiin ja ohjelmistoihin integroituja tekoälyominaisuuksia (kukaan ei halua uusia käyttöliittymiä tai ohjelmistoja)."'
+            },
+            q4: {
+                correct: 'c',
+                explanation: 'Microsoft Copilot Chat (työprofiili) on tietosuojan ja -turvan kannalta paras maksuton yleistyökalu Keusotessa.'
+            },
+            q5: {
+                correct: 'c',
+                explanation: 'Keusoten periaatteissa sanotaan: "Uudet tekoälyideat menee kokonaiskehittämisen mallin kautta (Jelppi-tiketti). Riskiluokitukset, eettisyys sekä tietoturva ja -suoja-asiat selvitetään viimeistään esiselvitysvaiheessa."'
+            },
+            q6: {
+                correct: 'c',
+                explanation: 'Keusoten periaatteen mukaan asiakas- ja potilastietojen on oltava EU/ETA-alueella kaikissa tekoälyratkaisuissa.'
+            },
+            q7: {
+                correct: 'b',
+                explanation: 'Keusote tavoittelee 10% vaikuttavuutta tekoälyn hyödyntämisestä.'
+            },
+            q8: {
+                correct: 'b',
+                explanation: 'Tärkein perusohje on: "Tarkista aina tekoälyn tuottamat tulokset ennen niiden käyttämistä tai julkaisua."'
+            },
+            q9: {
+                correct: 'b',
+                explanation: 'Keusoten periaatteissa sanotaan: "Tekoälyominaisuuksien ja -ohjelmistojen hankinnoissa informoidaan ja konsultoidaan aina tekoälytiimiä, mutta omistajuus toiminnoissa."'
+            },
+            q10: {
+                correct: 'b',
+                explanation: 'Keusoten tekoälyn motto on "Tukiäly kuuluu kaikille!"'
+            }
+        };
+
+        // Add event listeners for option selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    const radio = this.querySelector('input[type="radio"]');
+                    radio.checked = true;
+                    
+                    // Remove selected class from other options in the same question
+                    const questionContainer = this.closest('.question-container');
+                    const allOptions = questionContainer.querySelectorAll('.option');
+                    allOptions.forEach(opt => opt.classList.remove('selected'));
+                    
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
+                    
+                    updateProgress();
+                });
+            });
+        });
+
+        function updateProgress() {
+            const totalQuestions = 10;
+            const answeredQuestions = document.querySelectorAll('input[type="radio"]:checked').length;
+            const progress = (answeredQuestions / totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            
+            // Enable submit button if all questions answered
+            document.getElementById('submitBtn').disabled = answeredQuestions < totalQuestions;
+        }
+
+        document.getElementById('quizForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            let score = 0;
+            let wrongAnswers = [];
+            
+            // Calculate score
+            for (let [question, correctAnswer] of Object.entries(correctAnswers)) {
+                const userAnswer = formData.get(question);
+                if (userAnswer === correctAnswer) {
+                    score++;
+                } else {
+                    wrongAnswers.push({
+                        question: question,
+                        userAnswer: userAnswer,
+                        correctAnswer: correctAnswer,
+                        explanation: explanations[question].explanation
+                    });
+                }
+            }
+            
+            displayResults(score, wrongAnswers);
+        });
+
+        function displayResults(score, wrongAnswers) {
+            const resultsDiv = document.getElementById('results');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const feedbackText = document.getElementById('feedbackText');
+            const wrongAnswersDiv = document.getElementById('wrongAnswers');
+            
+            // Hide form and show results
+            document.getElementById('quizForm').style.display = 'none';
+            resultsDiv.style.display = 'block';
+            
+            // Display score
+            scoreDisplay.textContent = `${score}/10 pistettä (${Math.round(score/10*100)}%)`;
+            
+            // Determine result category and feedback
+            let resultClass, feedbackMessage;
+            if (score >= 8) {
+                resultClass = 'excellent';
+                feedbackMessage = '🎉 Erinomaista! Sinulla on vahva ymmärrys Keusoten tekoälystrategiasta. Olet valmis hyödyntämään tekoälyä työssäsi vastuullisesti ja tehokkaasti.';
+            } else if (score >= 6) {
+                resultClass = 'good';
+                feedbackMessage = '👍 Hyvä! Sinulla on hyvät perustiedot Keusoten tekoälystrategiasta. Suosittelemme tutustumaan tarkemmin intranetin ohjeistuksiin ja osallistumaan koulutuksiin.';
+            } else {
+                resultClass = 'needs-improvement';
+                feedbackMessage = '📚 Kehitettävää löytyy. Suosittelemme vahvasti tutustumaan Keusoten tekoälyn tiekarttaan ja osallistumaan tekoälyn koulutuksiin. Löydät lisätietoja intranetin tekoäly-sivuilta.';
+            }
+            
+            resultsDiv.className = `results ${resultClass}`;
+            feedbackText.textContent = feedbackMessage;
+            
+            // Display wrong answers
+            if (wrongAnswers.length > 0) {
+                wrongAnswersDiv.innerHTML = '<h3 style="margin-top: 0;">Väärät vastaukset ja oikeat vastaukset:</h3>';
+                wrongAnswers.forEach((wrong, index) => {
+                    const questionNumber = wrong.question.substring(1);
+                    const wrongDiv = document.createElement('div');
+                    wrongDiv.className = 'wrong-answer';
+                    wrongDiv.innerHTML = `
+                        <strong>Kysymys ${questionNumber}:</strong><br>
+                        ${wrong.explanation}
+                    `;
+                    wrongAnswersDiv.appendChild(wrongDiv);
+                });
+            } else {
+                wrongAnswersDiv.innerHTML = '<h3 style="margin-top: 0;">🎯 Kaikki vastaukset oikein!</h3>';
+            }
+        }
+
+        function restartQuiz() {
+            // Reset form
+            document.getElementById('quizForm').reset();
+            document.getElementById('quizForm').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            
+            // Remove selected classes
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Reset progress
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('submitBtn').disabled = true;
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // Initialize
+        document.getElementById('submitBtn').disabled = true;
+    </script>
+</body>
+</html>
